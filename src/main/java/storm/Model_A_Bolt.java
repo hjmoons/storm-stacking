@@ -27,9 +27,8 @@ public class Model_A_Bolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String inputJson = tuple.getString(0);
+        int[][] data = (int[][]) tuple.getValueByField("data");
 
-        float[][] data = new float[1][80];
         Tensor x = Tensor.create(data);
         Tensor result = sess.runner()
                 .feed("ensemble_1_cnn_input:0", x)
@@ -37,7 +36,7 @@ public class Model_A_Bolt extends BaseRichBolt {
                 .run()
                 .get(0);
 
-        float prob = (float) result.copyTo(new float[1]);
+        float[][] prob = (float[][]) result.copyTo(new float[1][1]);
 
         outputCollector.emit(new Values(prob));
         outputCollector.ack(tuple);
@@ -45,6 +44,6 @@ public class Model_A_Bolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("message"));
+        outputFieldsDeclarer.declare(new Fields("cnn"));
     }
 }
