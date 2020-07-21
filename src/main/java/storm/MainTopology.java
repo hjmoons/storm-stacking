@@ -18,9 +18,7 @@ import storm.output.OutputBolt;
 import java.util.Map;
 
 public class MainTopology {
-    public static InferenceModel inferenceModel = new InferenceModel("./");
-
-    private String topologyName = "Stacking Model";
+    private String topologyName = "StackingModel";
 
     private final int NUM_WORKERS = 8;
     private final int NUM_SPOUT = 1;

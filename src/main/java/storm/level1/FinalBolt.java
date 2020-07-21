@@ -7,22 +7,24 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 
 import java.util.Map;
 
-import static storm.MainTopology.inferenceModel;
-
 public class FinalBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
+    private SavedModelBundle savedModelBundle;
     private Session sess;
+
     private float[][] level0Result = new float[1][3];
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
-        this.sess = inferenceModel.getSession();
+        this.savedModelBundle = SavedModelBundle.load("./models/url/","serve");
+        this.sess = savedModelBundle.session();
     }
 
     @Override

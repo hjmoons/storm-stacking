@@ -13,16 +13,16 @@ import org.tensorflow.Tensor;
 
 import java.util.Map;
 
-import static storm.MainTopology.inferenceModel;
-
 public class CNNBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
+    private SavedModelBundle savedModelBundle;
     private Session sess;
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
-        this.sess = inferenceModel.getSession();
+        this.savedModelBundle = SavedModelBundle.load("./models/url/","serve");
+        this.sess = savedModelBundle.session();
     }
 
     @Override
