@@ -1,4 +1,4 @@
-package storm;
+package storm.input;
 
 public class Printable {
 

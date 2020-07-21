@@ -1,4 +1,4 @@
-package storm;
+package storm.level0;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static storm.MainTopology.inferenceModel;
 
-public class Model_C_Bolt extends BaseRichBolt {
+public class LSTMBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
     private Session sess;
 
@@ -26,16 +26,16 @@ public class Model_C_Bolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        int[][] data = (int[][]) tuple.getValueByField("data");
+        int[][] data = (int[][]) tuple.getValueByField("url");
 
         Tensor x = Tensor.create(data);
         Tensor result = sess.runner()
-                .feed("ensemble_3_gru_input:0", x)
-                .fetch("ensemble_3_gru_output/Sigmoid:0")
+                .feed("ensemble_2_lstm_input:0", x)
+                .fetch("ensemble_2_lstm_output/Sigmoid:0")
                 .run()
                 .get(0);
 
-        float[][] prob = (float[][]) result.copyTo(new float[1][1]);
+        float[] prob = (float[]) result.copyTo(new float[1]);
 
         outputCollector.emit(new Values(prob));
         outputCollector.ack(tuple);
@@ -43,6 +43,6 @@ public class Model_C_Bolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("gru"));
+        outputFieldsDeclarer.declare(new Fields("lstm"));
     }
 }
