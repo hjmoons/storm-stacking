@@ -41,7 +41,7 @@ public class MainTopology {
         topologyBuilder.setBolt("cnn-bolt", cnnBolt, NUM_CNNBOLT).allGrouping("input-spout");
         topologyBuilder.setBolt("lstm-bolt", lstmBolt, NUM_LSTMBOLT).allGrouping("input-spout");
         topologyBuilder.setBolt("gru-bolt", gruBolt, NUM_GRUBOLT).allGrouping("input-spout");
-        topologyBuilder.setBolt("final-bolt", finalBolt, NUM_FINALBOLT).fieldsGrouping("cnn-bolt", new Fields("cnn")).fieldsGrouping("lstm-bolt", new Fields("lstm")).fieldsGrouping("gru-bolt", new Fields("gru"));
+        topologyBuilder.setBolt("final-bolt", finalBolt, NUM_FINALBOLT).fieldsGrouping("cnn-bolt", new Fields("level0")).fieldsGrouping("lstm-bolt", new Fields("level0")).fieldsGrouping("gru-bolt", new Fields("level0"));
         topologyBuilder.setBolt("output-bolt", outputBolt, NUM_OUTPUTBOLT).shuffleGrouping("final-bolt");
 
         Config config = new Config();

@@ -1,5 +1,7 @@
 package storm.input;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -10,6 +12,7 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 
 public class InputSpout extends BaseRichSpout {
+    private Log log = LogFactory.getLog(InputSpout.class);
     private SpoutOutputCollector spoutOutputCollector;
     private Printable printable;
     private final String[] url_data = {
@@ -29,10 +32,16 @@ public class InputSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        spoutOutputCollector.emit(new Values(printable.convert(url_data[index])));
-        index++;
-        if (index >= url_data.length) {
-            index = 0;
+        try {
+            int[][] url_conv = printable.convert(url_data[index]);
+            spoutOutputCollector.emit(new Values(url_conv));
+            index++;
+            if (index >= url_data.length) {
+                index = 0;
+            }
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+
         }
     }
 
