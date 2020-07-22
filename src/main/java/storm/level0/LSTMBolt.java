@@ -12,29 +12,30 @@ import org.apache.storm.tuple.Values;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
+import storm.input.Preprocessor;
 
 import java.util.Map;
 
 public class LSTMBolt extends BaseRichBolt {
     private Log log = LogFactory.getLog(LSTMBolt.class);
     private OutputCollector outputCollector;
+    private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
     private Session sess;
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
+        this.preprocessor = new Preprocessor();
         this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/","serve");
         this.sess = savedModelBundle.session();
     }
 
     @Override
     public void execute(Tuple tuple) {
-        int[] data = (int[]) tuple.getValueByField("url");
-        int[][] input = new int[1][80];
-        for(int i = 0; i < 80; i++) {
-            input[0][i] = data[i];
-        }
+        String url = tuple.getStringByField("url");
+        int[][] input = preprocessor.convert(url);
+
         Tensor x = Tensor.create(input);
         Tensor result = sess.runner()
                 .feed("lstm_input:0", x)
@@ -42,9 +43,9 @@ public class LSTMBolt extends BaseRichBolt {
                 .run()
                 .get(0);
 
-        float[][] prob = (float[][]) result.copyTo(new float[1][1]);
+        float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(data, prob));
+        outputCollector.emit(new Values(url, pred[0][0]));
         outputCollector.ack(tuple);
     }
 

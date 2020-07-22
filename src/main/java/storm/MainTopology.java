@@ -1,5 +1,7 @@
 package storm;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.*;
@@ -18,31 +20,25 @@ import storm.output.OutputBolt;
 import java.util.Map;
 
 public class MainTopology {
+    private Log log = LogFactory.getLog(MainTopology.class);
     private String topologyName = "StackingModel";
 
     private final int NUM_WORKERS = 8;
     private final int NUM_SPOUT = 1;
     private final int NUM_CNNBOLT = 1;
-    private final int NUM_LSTMBOLT = 1;
-    private final int NUM_GRUBOLT = 1;
+    private final int NUM_LSTMBOLT = 2;
+    private final int NUM_GRUBOLT = 2;
     private final int NUM_FINALBOLT = 1;
     private final int NUM_OUTPUTBOLT = 1;
 
     public void topology() {
-        InputSpout inputSpout = new InputSpout();
-        CNNBolt cnnBolt = new CNNBolt();
-        LSTMBolt lstmBolt = new LSTMBolt();
-        GRUBolt gruBolt = new GRUBolt();
-        FinalBolt finalBolt = new FinalBolt();
-        OutputBolt outputBolt = new OutputBolt();
-
         TopologyBuilder topologyBuilder = new TopologyBuilder();
-        topologyBuilder.setSpout("input-spout", inputSpout, NUM_SPOUT);
-        topologyBuilder.setBolt("cnn-bolt", cnnBolt, NUM_CNNBOLT).allGrouping("input-spout");
-        topologyBuilder.setBolt("lstm-bolt", lstmBolt, NUM_LSTMBOLT).allGrouping("input-spout");
-        topologyBuilder.setBolt("gru-bolt", gruBolt, NUM_GRUBOLT).allGrouping("input-spout");
-        topologyBuilder.setBolt("final-bolt", finalBolt, NUM_FINALBOLT).fieldsGrouping("cnn-bolt", new Fields("level0")).fieldsGrouping("lstm-bolt", new Fields("level0")).fieldsGrouping("gru-bolt", new Fields("level0"));
-        topologyBuilder.setBolt("output-bolt", outputBolt, NUM_OUTPUTBOLT).shuffleGrouping("final-bolt");
+        topologyBuilder.setSpout("input-spout", new InputSpout(), NUM_SPOUT);
+        topologyBuilder.setBolt("cnn-bolt",  new CNNBolt(), NUM_CNNBOLT).allGrouping("input-spout");
+        topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).allGrouping("input-spout");
+        topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).allGrouping("input-spout");
+        topologyBuilder.setBolt("final-bolt", new FinalBolt(), NUM_FINALBOLT).fieldsGrouping("cnn-bolt", new Fields("url")).fieldsGrouping("lstm-bolt", new Fields("url")).fieldsGrouping("gru-bolt", new Fields("url"));
+        topologyBuilder.setBolt("output-bolt", new OutputBolt(), NUM_OUTPUTBOLT).shuffleGrouping("final-bolt");
 
         Config config = new Config();
         config.setNumWorkers(NUM_WORKERS);
@@ -59,13 +55,13 @@ public class MainTopology {
             client.killTopologyWithOpts(topologyName, killOpts);
 
         } catch (AlreadyAliveException e) {
-            //LOG.info(e.get_msg());
+            log.info(e.get_msg());
         } catch (InvalidTopologyException e) {
-            //LOG.info(e.get_msg());
+            log.info(e.get_msg());
         } catch (AuthorizationException e) {
-            //LOG.info(e.get_msg());
+            log.info(e.get_msg());
         } catch (NotAliveException e) {
-            //LOG.info(e.get_msg());
+            log.info(e.get_msg());
         } catch (TException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

@@ -1,6 +1,6 @@
 package storm.input;
 
-public class Printable {
+public class Preprocessor {
 
     static String printable = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ";
 
