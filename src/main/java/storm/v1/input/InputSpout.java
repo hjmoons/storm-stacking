@@ -1,4 +1,4 @@
-package storm.input;
+package storm.v1.input;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

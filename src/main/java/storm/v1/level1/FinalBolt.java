@@ -1,4 +1,4 @@
-package storm.level1;
+package storm.v1.level1;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,8 +46,10 @@ public class FinalBolt extends BaseRichBolt {
                 cnnMap.put(url, pred);
                 return;
             }
-            level0Result[0][1] = lstmMap.remove(url);
-            level0Result[0][2] = gruMap.remove(url);
+            if(lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
+            else return;
+            if(gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
+            else return;
         } else if (tuple.getSourceComponent().equals("lstm-bolt")) {
             float pred = tuple.getFloatByField("lstm");
             level0Result[0][1] = pred;
@@ -55,8 +57,10 @@ public class FinalBolt extends BaseRichBolt {
                 lstmMap.put(url, pred);
                 return;
             }
-            level0Result[0][0] = cnnMap.remove(url);
-            level0Result[0][2] = gruMap.remove(url);
+            if(cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
+            else return;
+            if(gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
+            else return;
         } else if (tuple.getSourceComponent().equals("gru-bolt")) {
             float pred = tuple.getFloatByField("gru");
             level0Result[0][2] = pred;
@@ -64,13 +68,15 @@ public class FinalBolt extends BaseRichBolt {
                 gruMap.put(url, pred);
                 return;
             }
-            level0Result[0][0] = cnnMap.remove(url);
-            level0Result[0][1] = lstmMap.remove(url);
+            if(cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
+            else return;
+            if(lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
+            else return;
         }
 
         Tensor x = Tensor.create(level0Result);
         Tensor result = sess.runner()
-                .feed("concatenate_1:0", x)
+                .feed("final_input/concat:0", x)
                 .fetch("final_output/Sigmoid:0")
                 .run()
                 .get(0);

@@ -1,4 +1,4 @@
-package storm.level0;
+package storm.v1.level0;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,7 +12,7 @@ import org.apache.storm.tuple.Values;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import storm.input.Preprocessor;
+import storm.v1.input.Preprocessor;
 
 import java.util.Map;
 

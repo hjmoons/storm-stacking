@@ -1,4 +1,4 @@
-package storm;
+package storm.v1;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,12 +10,12 @@ import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.utils.NimbusClient;
 import org.apache.storm.utils.Utils;
-import storm.input.InputSpout;
-import storm.level0.CNNBolt;
-import storm.level0.GRUBolt;
-import storm.level0.LSTMBolt;
-import storm.level1.FinalBolt;
-import storm.output.OutputBolt;
+import storm.v1.input.InputSpout;
+import storm.v1.level0.CNNBolt;
+import storm.v1.level0.GRUBolt;
+import storm.v1.level0.LSTMBolt;
+import storm.v1.level1.FinalBolt;
+import storm.v1.output.OutputBolt;
 
 import java.util.Map;
 
