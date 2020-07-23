@@ -32,6 +32,8 @@ public class MainTopology {
     private final int NUM_OUTPUTBOLT = 1;
 
     public void topology() {
+        Map<String, Object> topoConf = Utils.findAndReadConfigFile("./perf.yaml");
+
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setSpout("input-spout", new InputSpout(), NUM_SPOUT);
         topologyBuilder.setBolt("cnn-bolt",  new CNNBolt(), NUM_CNNBOLT).allGrouping("input-spout");
