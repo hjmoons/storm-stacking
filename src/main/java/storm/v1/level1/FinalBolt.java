@@ -31,7 +31,7 @@ public class FinalBolt extends BaseRichBolt {
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
-        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/","serve");
+        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/", "serve");
         this.sess = savedModelBundle.session();
     }
 
@@ -39,38 +39,38 @@ public class FinalBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
 
-        if(tuple.getSourceComponent().equals("cnn-bolt")) {
+        if (tuple.getSourceComponent().equals("cnn-bolt")) {
             float pred = tuple.getFloatByField("cnn");
             level0Result[0][0] = pred;
-            if(!cnnMap.containsKey(url)) {
+            if (!cnnMap.containsKey(url)) {
                 cnnMap.put(url, pred);
                 return;
             }
-            if(lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
+            if (lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
             else return;
-            if(gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
+            if (gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
             else return;
         } else if (tuple.getSourceComponent().equals("lstm-bolt")) {
             float pred = tuple.getFloatByField("lstm");
             level0Result[0][1] = pred;
-            if(!lstmMap.containsKey(url)) {
+            if (!lstmMap.containsKey(url)) {
                 lstmMap.put(url, pred);
                 return;
             }
-            if(cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
+            if (cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
             else return;
-            if(gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
+            if (gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
             else return;
         } else if (tuple.getSourceComponent().equals("gru-bolt")) {
             float pred = tuple.getFloatByField("gru");
             level0Result[0][2] = pred;
-            if(!gruMap.containsKey(url)) {
+            if (!gruMap.containsKey(url)) {
                 gruMap.put(url, pred);
                 return;
             }
-            if(cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
+            if (cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
             else return;
-            if(lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
+            if (lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
             else return;
         }
 

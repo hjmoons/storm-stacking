@@ -34,7 +34,7 @@ public class MainTopology {
     public void topology() {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setSpout("input-spout", new InputSpout(), NUM_SPOUT);
-        topologyBuilder.setBolt("cnn-bolt",  new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("input-spout");
+        topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).shuffleGrouping("cnn-bolt");
         topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).shuffleGrouping("lstm-bolt");
         topologyBuilder.setBolt("final-bolt", new FinalBolt(), NUM_FINALBOLT).shuffleGrouping("gru-bolt");

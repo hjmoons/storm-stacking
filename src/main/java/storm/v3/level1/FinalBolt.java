@@ -31,7 +31,7 @@ public class FinalBolt extends BaseRichBolt {
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
-        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/","serve");
+        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/", "serve");
         this.sess = savedModelBundle.session();
     }
 

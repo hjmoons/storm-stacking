@@ -27,7 +27,7 @@ public class LSTMBolt extends BaseRichBolt {
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
         this.preprocessor = new Preprocessor();
-        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/","serve");
+        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/", "serve");
         this.sess = savedModelBundle.session();
     }
 

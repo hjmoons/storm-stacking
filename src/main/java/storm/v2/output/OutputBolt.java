@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class OutputBolt extends BaseRichBolt {
     private Log log = LogFactory.getLog(OutputBolt.class);
+
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
 
