@@ -1,4 +1,4 @@
-package storm.v2.input;
+package storm.input;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +28,7 @@ public class InputSpout extends BaseRichSpout {
             "http://astrologybybeverlee.homestead.com/",
             "http://47.88.21.111/%20"
     };
+    private int count;
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
@@ -37,9 +38,9 @@ public class InputSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        spoutOutputCollector.emit(new Values(url_data[random.nextInt(10)]));
+        spoutOutputCollector.emit(new Values(url_data[random.nextInt(10)]), count++);
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
