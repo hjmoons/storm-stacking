@@ -1,4 +1,4 @@
-package storm.v1.input;
+package storm.input;
 
 public class Preprocessor {
 

@@ -1,4 +1,4 @@
-package storm.v3.level1;
+package storm.detect;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -14,27 +14,23 @@ import org.springframework.core.io.ClassPathResource;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
+import storm.old.v1.input.Preprocessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.HashMap;
 import java.util.Map;
 
-public class FinalBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(FinalBolt.class);
+public class GRUBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(GRUBolt.class);
     private OutputCollector outputCollector;
+    private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
     private Session sess;
-
-    private float[][] level0Result = new float[1][3];
-
-    private Map<String, Float> cnnMap = new HashMap<>();
-    private Map<String, Float> lstmMap = new HashMap<>();
-    private Map<String, Float> gruMap = new HashMap<>();
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
+        this.preprocessor = new Preprocessor();
 
         File directory = new File("variables");
         if (! directory.exists()){
@@ -63,15 +59,12 @@ public class FinalBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
+        int[][] input = preprocessor.convert(url);
 
-        level0Result[0][0] = tuple.getFloatByField("cnn");
-        level0Result[0][1] = tuple.getFloatByField("lstm");
-        level0Result[0][2] = tuple.getFloatByField("gru");
-
-        Tensor x = Tensor.create(level0Result);
+        Tensor x = Tensor.create(input);
         Tensor result = sess.runner()
-                .feed("final_input/concat:0", x)
-                .fetch("final_output/Sigmoid:0")
+                .feed("gru_input:0", x)
+                .fetch("gru_output/Sigmoid:0")
                 .run()
                 .get(0);
 
@@ -83,6 +76,6 @@ public class FinalBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "pred"));
+        outputFieldsDeclarer.declare(new Fields("url", "gru"));
     }
 }

@@ -1,4 +1,4 @@
-package storm.v1.output;
+package storm.output;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,10 +12,11 @@ import java.util.Map;
 
 public class OutputBolt extends BaseRichBolt {
     private Log log = LogFactory.getLog(OutputBolt.class);
+    private OutputCollector outputCollector;
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-
+        this.outputCollector = outputCollector;
     }
 
     @Override
@@ -23,6 +24,7 @@ public class OutputBolt extends BaseRichBolt {
         String url = tuple.getStringByField("url");
         float pred = tuple.getFloatByField("pred");
         log.info("[ \"url\" : " + url + ", \"pred\" : " + pred + " ]");
+        outputCollector.ack(tuple);
     }
 
     @Override

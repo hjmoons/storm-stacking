@@ -1,4 +1,4 @@
-package storm.v3.level0;
+package storm.detect;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -14,15 +14,15 @@ import org.springframework.core.io.ClassPathResource;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import storm.v3.input.Preprocessor;
+import storm.old.v2.input.Preprocessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Level0Bolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(Level0Bolt.class);
+public class FinalSecondBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(FinalSecondBolt.class);
     private OutputCollector outputCollector;
     private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
@@ -96,12 +96,25 @@ public class Level0Bolt extends BaseRichBolt {
 
         float[][] gru_pred = (float[][]) result_3.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, cnn_pred[0][0], lstm_pred[0][0], gru_pred[0][0]));
+        level0Result[0][0] = cnn_pred[0][0];
+        level0Result[0][1] = lstm_pred[0][0];
+        level0Result[0][2] = gru_pred[0][0];
+
+        Tensor x = Tensor.create(level0Result);
+        Tensor result = sess.runner()
+                .feed("final_input/concat:0", x)
+                .fetch("final_output/Sigmoid:0")
+                .run()
+                .get(0);
+
+        float[][] final_pred = (float[][]) result.copyTo(new float[1][1]);
+
+        outputCollector.emit(new Values(url, final_pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "cnn", "lstm", "gru"));
+        outputFieldsDeclarer.declare(new Fields("url", "pred"));
     }
 }
