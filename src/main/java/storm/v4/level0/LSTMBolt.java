@@ -1,5 +1,6 @@
 package storm.v4.level0;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.storm.task.OutputCollector;
@@ -9,11 +10,14 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.springframework.core.io.ClassPathResource;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import storm.v4.input.Preprocessor;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Map;
 
 public class LSTMBolt extends BaseRichBolt {
@@ -27,8 +31,29 @@ public class LSTMBolt extends BaseRichBolt {
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
         this.preprocessor = new Preprocessor();
-        this.savedModelBundle = SavedModelBundle.load("/home/hjmoon/models/url/", "serve");
-        this.sess = savedModelBundle.session();
+
+        File directory = new File("variables");
+        if (! directory.exists()){
+            directory.mkdir();
+        }
+
+        ClassPathResource model = new ClassPathResource("saved_model.pb");
+        ClassPathResource v1 = new ClassPathResource("variables/variables.data-00000-of-00001");
+        ClassPathResource v2 = new ClassPathResource("variables/variables.index");
+
+        try {
+            File modelFile = new File("./saved_model.pb");
+            File v1File = new File("./variables/variables.data-00000-of-00001");
+            File v2File = new File("./variables/variables.index");
+            IOUtils.copy(model.getInputStream(),new FileOutputStream(modelFile));
+            IOUtils.copy(v1.getInputStream(),new FileOutputStream(v1File));
+            IOUtils.copy(v2.getInputStream(),new FileOutputStream(v2File));
+
+            this.savedModelBundle = SavedModelBundle.load("./", "serve");
+            this.sess = savedModelBundle.session();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

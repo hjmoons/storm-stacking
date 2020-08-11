@@ -23,8 +23,8 @@ public class MainTopology {
 
     private final int NUM_WORKERS = 8;
     private final int NUM_SPOUT = 1;
-    private final int NUM_LEVEL0BOLT = 4;
-    private final int NUM_FINALBOLT = 2;
+    private final int NUM_LEVEL0BOLT = 3;
+    private final int NUM_FINALBOLT = 3;
     private final int NUM_OUTPUTBOLT = 1;
 
     public void topology() {
