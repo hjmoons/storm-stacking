@@ -14,7 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import storm.old.v2.input.Preprocessor;
+import storm.input.Preprocessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
