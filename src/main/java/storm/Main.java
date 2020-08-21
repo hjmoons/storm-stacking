@@ -22,16 +22,16 @@ public class Main {
 
         switch (Integer.parseInt(topologyNumber)) {
             case 1:
-                Helper.runOnClusterAndPrintMetrics(10 * 60, topologyName, topoConf, new FirstTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new FirstTopo().topology());
                 break;
             case 2:
-                Helper.runOnClusterAndPrintMetrics(10 * 60, topologyName, topoConf, new SecondTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new SecondTopo().topology());
                 break;
             case 3:
-                Helper.runOnClusterAndPrintMetrics(10 * 60, topologyName, topoConf, new ThirdTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new ThirdTopo().topology());
                 break;
             case 4:
-                Helper.runOnClusterAndPrintMetrics(10 * 60, topologyName, topoConf, new FourthTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new FourthTopo().topology());
                 break;
             default:
                 break;

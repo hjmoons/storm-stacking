@@ -8,7 +8,7 @@ import storm.output.OutputBolt;
 
 public class SecondTopo {
     private final int NUM_SPOUT = 1;
-    private final int NUM_FINALBOLT = 1;
+    private final int NUM_FINALBOLT = 6;
     private final int NUM_OUTPUTBOLT = 1;
 
     public StormTopology topology() {
