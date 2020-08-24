@@ -21,9 +21,9 @@ public class FirstTopo {
     public StormTopology topology() {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setSpout("input-spout", new InputSpout(), NUM_SPOUT);
-        topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).allGrouping("input-spout");
-        topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).allGrouping("input-spout");
-        topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).allGrouping("input-spout");
+        topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("input-spout");
+        topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).shuffleGrouping("input-spout");
+        topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("final-bolt", new FinalFirstBolt(), NUM_FINALBOLT)
                 .fieldsGrouping("cnn-bolt", new Fields("url"))
                 .fieldsGrouping("lstm-bolt", new Fields("url"))
