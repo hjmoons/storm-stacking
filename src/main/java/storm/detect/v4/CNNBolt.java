@@ -1,4 +1,4 @@
-package storm.detect;
+package storm.detect.v4;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -18,21 +18,14 @@ import storm.input.Preprocessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.HashMap;
 import java.util.Map;
 
-public class Level0Bolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(Level0Bolt.class);
+public class CNNBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(CNNBolt.class);
     private OutputCollector outputCollector;
     private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
     private Session sess;
-
-    private float[][] level0Result = new float[1][3];
-
-    private Map<String, Float> cnnMap = new HashMap<>();
-    private Map<String, Float> lstmMap = new HashMap<>();
-    private Map<String, Float> gruMap = new HashMap<>();
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
@@ -66,42 +59,24 @@ public class Level0Bolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
+
         int[][] input = preprocessor.convert(url);
 
-        // CNN Model
-        Tensor x_1 = Tensor.create(input);
-        Tensor result_1 = sess.runner()
-                .feed("cnn_input:0", x_1)
+        Tensor x = Tensor.create(input);
+        Tensor result = sess.runner()
+                .feed("cnn_input:0", x)
                 .fetch("cnn_output/Sigmoid:0")
                 .run()
                 .get(0);
 
-        float[][] cnn_pred = (float[][]) result_1.copyTo(new float[1][1]);
+        float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        Tensor x_2 = Tensor.create(input);
-        Tensor result_2 = sess.runner()
-                .feed("lstm_input:0", x_2)
-                .fetch("lstm_output/Sigmoid:0")
-                .run()
-                .get(0);
-
-        float[][] lstm_pred = (float[][]) result_2.copyTo(new float[1][1]);
-
-        Tensor x_3 = Tensor.create(input);
-        Tensor result_3 = sess.runner()
-                .feed("gru_input:0", x_3)
-                .fetch("gru_output/Sigmoid:0")
-                .run()
-                .get(0);
-
-        float[][] gru_pred = (float[][]) result_3.copyTo(new float[1][1]);
-
-        outputCollector.emit(new Values(url, cnn_pred[0][0], lstm_pred[0][0], gru_pred[0][0]));
+        outputCollector.emit(new Values(url, pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "cnn", "lstm", "gru"));
+        outputFieldsDeclarer.declare(new Fields("url", "cnn"));
     }
 }

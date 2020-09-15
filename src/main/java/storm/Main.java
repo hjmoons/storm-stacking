@@ -15,6 +15,8 @@ public class Main {
         String topologyName = args[0];
         String configPath = args[1];
         String topologyNumber = args[2];
+        int executionTime = Integer.parseInt(args[3]);
+        int transmitTime = Integer.parseInt(args[4]);
 
         Map<String, Object> topoConf = Utils.findAndReadConfigFile(configPath);
         topoConf.put(Config.TOPOLOGY_DISABLE_LOADAWARE_MESSAGING, true);
@@ -22,16 +24,16 @@ public class Main {
 
         switch (Integer.parseInt(topologyNumber)) {
             case 1:
-                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new FirstTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new FirstTopo().topology(transmitTime));
                 break;
             case 2:
-                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new SecondTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SecondTopo().topology(transmitTime));
                 break;
             case 3:
-                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new ThirdTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new ThirdTopo().topology(transmitTime));
                 break;
             case 4:
-                Helper.runOnClusterAndPrintMetrics(11 * 60, topologyName, topoConf, new FourthTopo().topology());
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new FourthTopo().topology(transmitTime));
                 break;
             default:
                 break;

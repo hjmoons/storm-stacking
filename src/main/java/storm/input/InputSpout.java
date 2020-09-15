@@ -2,6 +2,7 @@ package storm.input;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.storm.metrics.hdrhistogram.HistogramMetric;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -11,6 +12,7 @@ import org.apache.storm.tuple.Values;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class InputSpout extends BaseRichSpout {
     private Log log = LogFactory.getLog(InputSpout.class);
@@ -28,19 +30,41 @@ public class InputSpout extends BaseRichSpout {
             "http://astrologybybeverlee.homestead.com/",
             "http://47.88.21.111/%20"
     };
-    private int count;
+    private int trans_time;
+
+    private class SentWithTime {
+        public final String url;
+        public final long time;
+
+        SentWithTime(String url, long time) {
+            this.url = url;
+            this.time = time;
+        }
+    }
+
+    HistogramMetric _histo;
+
+    public InputSpout(int trans_time) {
+        this.trans_time = trans_time;
+    }
+
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
         this.spoutOutputCollector = spoutOutputCollector;
         this.random = new Random();
+
+        _histo = new HistogramMetric(3600000000000L, 3);
+        topologyContext.registerMetric("comp-lat-histo", _histo, 10); //Update every 10 seconds, so we are not too far behind
     }
 
     @Override
     public void nextTuple() {
-        spoutOutputCollector.emit(new Values(url_data[random.nextInt(10)]), count++);
+        //spoutOutputCollector.emit(new Values(url_data[random.nextInt(10)]), count++);
+        String url = url_data[random.nextInt(10)];
+        spoutOutputCollector.emit(new Values(url), new SentWithTime(url, System.nanoTime()));
         try {
-            Thread.sleep(100);
+            Thread.sleep(trans_time);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -49,5 +73,18 @@ public class InputSpout extends BaseRichSpout {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("url"));
+    }
+
+    @Override
+    public void ack(Object id) {
+        long end = System.nanoTime();
+        SentWithTime st = (SentWithTime)id;
+        _histo.recordValue(end-st.time);
+    }
+
+    @Override
+    public void fail(Object id) {
+        SentWithTime st = (SentWithTime)id;
+        spoutOutputCollector.emit(new Values(st.url), id);
     }
 }

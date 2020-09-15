@@ -43,6 +43,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
+            <artifactId>storm-metrics</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.storm</groupId>
             <artifactId>storm-perf</artifactId>
             <version>1.2.2</version>
             <exclusions>
