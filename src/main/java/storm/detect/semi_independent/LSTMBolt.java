@@ -1,4 +1,4 @@
-package storm.detect.v1;
+package storm.detect.semi_independent;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -20,8 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Map;
 
-public class GRUBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(GRUBolt.class);
+public class LSTMBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(LSTMBolt.class);
     private OutputCollector outputCollector;
     private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
@@ -59,23 +59,25 @@ public class GRUBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
+        float cnn = tuple.getFloatByField("cnn");
+
         int[][] input = preprocessor.convert(url);
 
         Tensor x = Tensor.create(input);
         Tensor result = sess.runner()
-                .feed("gru_input:0", x)
-                .fetch("gru_output/Sigmoid:0")
+                .feed("lstm_input:0", x)
+                .fetch("lstm_output/Sigmoid:0")
                 .run()
                 .get(0);
 
         float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, pred[0][0]));
+        outputCollector.emit(new Values(url, cnn, pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "gru"));
+        outputFieldsDeclarer.declare(new Fields("url", "cnn", "lstm"));
     }
 }

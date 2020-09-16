@@ -2,7 +2,7 @@ package storm.topo;
 
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import storm.detect.v2.FinalSecondBolt;
+import storm.detect.integrated.IntegratedStackingBolt;
 import storm.input.InputSpout;
 import storm.output.OutputBolt;
 
@@ -14,7 +14,7 @@ public class SecondTopo {
     public StormTopology topology(int trans_time) {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setSpout("input-spout", new InputSpout(trans_time), NUM_SPOUT);
-        topologyBuilder.setBolt("final-bolt", new FinalSecondBolt(), NUM_FINALBOLT).shuffleGrouping("input-spout");
+        topologyBuilder.setBolt("final-bolt", new IntegratedStackingBolt(), NUM_FINALBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("output-bolt", new OutputBolt(), NUM_OUTPUTBOLT).shuffleGrouping("final-bolt");
 
         return topologyBuilder.createTopology();

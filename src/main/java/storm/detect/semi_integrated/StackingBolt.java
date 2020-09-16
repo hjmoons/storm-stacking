@@ -1,4 +1,4 @@
-package storm.detect.v3;
+package storm.detect.semi_integrated;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -20,8 +20,8 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FinalThirdBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(FinalThirdBolt.class);
+public class StackingBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(StackingBolt.class);
     private OutputCollector outputCollector;
     private SavedModelBundle savedModelBundle;
     private Session sess;

@@ -1,4 +1,4 @@
-package storm.detect.v4;
+package storm.detect.independent;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -20,8 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Map;
 
-public class CNNBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(CNNBolt.class);
+public class GRUBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(GRUBolt.class);
     private OutputCollector outputCollector;
     private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
@@ -59,13 +59,12 @@ public class CNNBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
-
         int[][] input = preprocessor.convert(url);
 
         Tensor x = Tensor.create(input);
         Tensor result = sess.runner()
-                .feed("cnn_input:0", x)
-                .fetch("cnn_output/Sigmoid:0")
+                .feed("gru_input:0", x)
+                .fetch("gru_output/Sigmoid:0")
                 .run()
                 .get(0);
 
@@ -77,6 +76,6 @@ public class CNNBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "cnn"));
+        outputFieldsDeclarer.declare(new Fields("url", "gru"));
     }
 }

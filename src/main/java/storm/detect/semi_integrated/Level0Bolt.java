@@ -1,4 +1,4 @@
-package storm.detect.v3;
+package storm.detect.semi_integrated;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;

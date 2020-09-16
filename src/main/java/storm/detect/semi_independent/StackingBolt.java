@@ -1,4 +1,4 @@
-package storm.detect.v4;
+package storm.detect.semi_independent;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -20,8 +20,8 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FinalFourthBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(FinalFourthBolt.class);
+public class StackingBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(StackingBolt.class);
     private OutputCollector outputCollector;
     private SavedModelBundle savedModelBundle;
     private Session sess;

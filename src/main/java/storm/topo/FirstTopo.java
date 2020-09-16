@@ -3,10 +3,10 @@ package storm.topo;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
-import storm.detect.v1.CNNBolt;
-import storm.detect.v1.FinalFirstBolt;
-import storm.detect.v1.GRUBolt;
-import storm.detect.v1.LSTMBolt;
+import storm.detect.independent.CNNBolt;
+import storm.detect.independent.StackingBolt;
+import storm.detect.independent.GRUBolt;
+import storm.detect.independent.LSTMBolt;
 import storm.input.InputSpout;
 import storm.output.OutputBolt;
 
@@ -24,7 +24,7 @@ public class FirstTopo {
         topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).shuffleGrouping("input-spout");
-        topologyBuilder.setBolt("final-bolt", new FinalFirstBolt(), NUM_FINALBOLT)
+        topologyBuilder.setBolt("final-bolt", new StackingBolt(), NUM_FINALBOLT)
                 .fieldsGrouping("cnn-bolt", new Fields("url"))
                 .fieldsGrouping("lstm-bolt", new Fields("url"))
                 .fieldsGrouping("gru-bolt", new Fields("url"));
