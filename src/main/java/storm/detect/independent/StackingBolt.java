@@ -21,16 +21,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StackingBolt extends BaseRichBolt {
+    class PredictionTriplet {
+        float cnn = -1;
+        float lstm = -1;
+        float gru = -1;
+    }
     private Log log = LogFactory.getLog(StackingBolt.class);
     private OutputCollector outputCollector;
     private SavedModelBundle savedModelBundle;
     private Session sess;
 
-    private float[][] level0Result = new float[1][3];
-
-    private Map<String, Float> cnnMap = new HashMap<>();
-    private Map<String, Float> lstmMap = new HashMap<>();
-    private Map<String, Float> gruMap = new HashMap<>();
+    private Map<Long, PredictionTriplet> preds = new HashMap<>();
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
@@ -63,41 +64,32 @@ public class StackingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
+        long id = tuple.getLongByField("id");
 
-        if (tuple.getSourceComponent().equals("cnn-bolt")) {
-            float pred = tuple.getFloatByField("cnn");
-            level0Result[0][0] = pred;
-            if (!cnnMap.containsKey(url)) {
-                cnnMap.put(url, pred);
-                return;
-            }
-            if (lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
-            else return;
-            if (gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
-            else return;
-        } else if (tuple.getSourceComponent().equals("lstm-bolt")) {
-            float pred = tuple.getFloatByField("lstm");
-            level0Result[0][1] = pred;
-            if (!lstmMap.containsKey(url)) {
-                lstmMap.put(url, pred);
-                return;
-            }
-            if (cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
-            else return;
-            if (gruMap.containsKey(url)) level0Result[0][2] = gruMap.remove(url);
-            else return;
-        } else if (tuple.getSourceComponent().equals("gru-bolt")) {
-            float pred = tuple.getFloatByField("gru");
-            level0Result[0][2] = pred;
-            if (!gruMap.containsKey(url)) {
-                gruMap.put(url, pred);
-                return;
-            }
-            if (cnnMap.containsKey(url)) level0Result[0][0] = cnnMap.remove(url);
-            else return;
-            if (lstmMap.containsKey(url)) level0Result[0][1] = lstmMap.remove(url);
-            else return;
+        PredictionTriplet triplet;
+        if (preds.containsKey(id)) {
+            triplet = preds.get(id);
+        } else {
+            triplet = new PredictionTriplet();
+            preds.put(id, triplet);
         }
+
+        switch (tuple.getSourceComponent()) {
+            case "cnn-bolt":
+                triplet.cnn = tuple.getFloatByField("cnn");
+                break;
+            case "lstm-bolt":
+                triplet.lstm = tuple.getFloatByField("lstm");
+                break;
+            case "gru-bolt":
+                triplet.gru = tuple.getFloatByField("gru");
+                break;
+        }
+
+        if (triplet.cnn == -1 || triplet.lstm == -1 || triplet.gru == -1)
+            return;
+
+        float[][] level0Result = new float[][]{{triplet.cnn, triplet.lstm, triplet.gru}};
 
         Tensor x = Tensor.create(level0Result);
         Tensor result = sess.runner()

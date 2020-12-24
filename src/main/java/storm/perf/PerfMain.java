@@ -26,6 +26,7 @@ public class PerfMain {
     private static final AtomicLong _gcCount = new AtomicLong(0);
     private static final AtomicLong _gcMs = new AtomicLong(0);
     private static final ConcurrentHashMap<String, MemMeasure> _memoryBytes = new ConcurrentHashMap<String, MemMeasure>();
+    private static final int parallelism = 8;
 
     private static long readMemory() {
         long total = 0;
@@ -98,12 +99,6 @@ public class PerfMain {
         _prev_acked = acked;
     }
 
-    public static void kill(Cluster client, String name) throws Exception {
-        KillOptions opts = new KillOptions();
-        opts.set_wait_secs(0);
-        client.killTopologyWithOpts(name, opts);
-    }
-
     public static void main(String[] args) throws Exception {
         int topologyNum = Integer.parseInt(args[0]);
         if (!(topologyNum > 0 && topologyNum < 5)) {
@@ -130,8 +125,6 @@ public class PerfMain {
         if (args != null && args.length > 4) {
             transmitTime = Integer.parseInt(args[4]);
         }
-
-        int parallelism = 8;
 
         Config conf = new Config();
 
@@ -217,7 +210,7 @@ public class PerfMain {
                 printMetrics(cluster, topologyName);
             }
         } finally {
-            kill(cluster, topologyName);
+            cluster.killTopology(topologyName);
         }
         System.exit(0);
     }

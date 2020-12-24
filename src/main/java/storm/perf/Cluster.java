@@ -44,7 +44,9 @@ public class Cluster {
         }
     }
 
-    public void killTopologyWithOpts(String name, KillOptions opts) throws Exception {
+    public void killTopology(String name) throws Exception {
+        KillOptions opts = new KillOptions();
+        opts.set_wait_secs(0);
         if (_local != null) {
             _local.killTopologyWithOpts(name, opts);
         } else {
@@ -57,7 +59,24 @@ public class Cluster {
             _local.submitTopology(name, stormConf, topology);
         } else {
             StormSubmitter.submitTopology(name, stormConf, topology);
+            setupShutdownHook(name);
         }
+    }
+
+    public void setupShutdownHook(String name) {
+        Map clusterConf = Utils.readStormConfig();
+        final Nimbus.Client client = NimbusClient.getConfiguredClient(clusterConf).getClient();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    killTopology(name);
+                    System.out.println("Killed Topology");
+                } catch (Exception var2) {
+                    var2.printStackTrace();
+                }
+
+            }
+        });
     }
 
     public boolean isLocal() {

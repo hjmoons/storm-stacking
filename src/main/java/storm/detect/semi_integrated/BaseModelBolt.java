@@ -21,8 +21,8 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Level0Bolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(Level0Bolt.class);
+public class BaseModelBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(BaseModelBolt.class);
     private OutputCollector outputCollector;
     private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;

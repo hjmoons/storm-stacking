@@ -9,6 +9,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import org.apache.storm.utils.Utils;
 
 import java.util.Map;
 import java.util.Random;
@@ -33,10 +34,12 @@ public class InputSpout extends BaseRichSpout {
     private int trans_time;
 
     private class SentWithTime {
+        public final long id;
         public final String url;
         public final long time;
 
-        SentWithTime(String url, long time) {
+        SentWithTime(long id, String url, long time) {
+            this.id = id;
             this.url = url;
             this.time = time;
         }
@@ -58,21 +61,21 @@ public class InputSpout extends BaseRichSpout {
         topologyContext.registerMetric("comp-lat-histo", _histo, 10); //Update every 10 seconds, so we are not too far behind
     }
 
+    long count = 0l;
+    long nextTime = 0l;
     @Override
     public void nextTuple() {
-        //spoutOutputCollector.emit(new Values(url_data[random.nextInt(10)]), count++);
-        String url = url_data[random.nextInt(10)];
-        spoutOutputCollector.emit(new Values(url), new SentWithTime(url, System.nanoTime()));
-        try {
-            Thread.sleep(trans_time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (System.currentTimeMillis() >= nextTime) {
+            count++;
+            String url = url_data[random.nextInt(10)];
+            spoutOutputCollector.emit(new Values(count, url), new SentWithTime(count, url, System.nanoTime()));
+            nextTime = System.currentTimeMillis() + trans_time;
         }
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url"));
+        outputFieldsDeclarer.declare(new Fields("id", "url"));
     }
 
     @Override
@@ -85,6 +88,6 @@ public class InputSpout extends BaseRichSpout {
     @Override
     public void fail(Object id) {
         SentWithTime st = (SentWithTime)id;
-        spoutOutputCollector.emit(new Values(st.url), id);
+        spoutOutputCollector.emit(new Values(st.id, st.url), id);
     }
 }

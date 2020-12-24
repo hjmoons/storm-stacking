@@ -58,6 +58,7 @@ public class LSTMBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
+        long id = tuple.getLongByField("id");
         String url = tuple.getStringByField("url");
         int[][] input = preprocessor.convert(url);
 
@@ -70,12 +71,12 @@ public class LSTMBolt extends BaseRichBolt {
 
         float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, pred[0][0]));
+        outputCollector.emit(new Values(id, url, pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "lstm"));
+        outputFieldsDeclarer.declare(new Fields("id", "url", "lstm"));
     }
 }
