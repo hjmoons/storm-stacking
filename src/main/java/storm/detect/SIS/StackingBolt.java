@@ -1,4 +1,4 @@
-package storm.detect.semi_independent;
+package storm.detect.SIS;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;

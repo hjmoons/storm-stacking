@@ -1,4 +1,4 @@
-package storm.detect.semi_independent;
+package storm.detect.IS;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -58,10 +58,8 @@ public class GRUBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
+        long id = tuple.getLongByField("id");
         String url = tuple.getStringByField("url");
-        float cnn = tuple.getFloatByField("cnn");
-        float lstm = tuple.getFloatByField("lstm");
-
         int[][] input = preprocessor.convert(url);
 
         Tensor x = Tensor.create(input);
@@ -73,12 +71,12 @@ public class GRUBolt extends BaseRichBolt {
 
         float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, cnn, lstm, pred[0][0]));
+        outputCollector.emit(new Values(id, url, pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "cnn", "lstm", "gru"));
+        outputFieldsDeclarer.declare(new Fields("id", "url", "gru"));
     }
 }

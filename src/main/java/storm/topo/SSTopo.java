@@ -2,11 +2,11 @@ package storm.topo;
 
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import storm.detect.integrated.IntegratedStackingBolt;
+import storm.detect.SS.IntegratedStackingBolt;
 import storm.input.InputSpout;
 import storm.output.OutputBolt;
 
-public class SecondTopo {
+public class SSTopo {
     private final int NUM_SPOUT = 1;
     private final int NUM_FINALBOLT = 6;
     private final int NUM_OUTPUTBOLT = 1;

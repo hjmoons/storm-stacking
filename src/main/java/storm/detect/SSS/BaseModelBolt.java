@@ -1,4 +1,4 @@
-package storm.detect.independent;
+package storm.detect.SSS;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -14,28 +14,30 @@ import org.springframework.core.io.ClassPathResource;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
+import storm.input.Preprocessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StackingBolt extends BaseRichBolt {
-    class PredictionTriplet {
-        float cnn = -1;
-        float lstm = -1;
-        float gru = -1;
-    }
-    private Log log = LogFactory.getLog(StackingBolt.class);
+public class BaseModelBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(BaseModelBolt.class);
     private OutputCollector outputCollector;
+    private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
     private Session sess;
 
-    private Map<Long, PredictionTriplet> preds = new HashMap<>();
+    private float[][] level0Result = new float[1][3];
+
+    private Map<String, Float> cnnMap = new HashMap<>();
+    private Map<String, Float> lstmMap = new HashMap<>();
+    private Map<String, Float> gruMap = new HashMap<>();
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
+        this.preprocessor = new Preprocessor();
 
         File directory = new File("variables");
         if (! directory.exists()){
@@ -64,48 +66,42 @@ public class StackingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
-        long id = tuple.getLongByField("id");
+        int[][] input = preprocessor.convert(url);
 
-        PredictionTriplet triplet;
-        if (preds.containsKey(id)) {
-            triplet = preds.get(id);
-        } else {
-            triplet = new PredictionTriplet();
-            preds.put(id, triplet);
-        }
-
-        switch (tuple.getSourceComponent()) {
-            case "cnn-bolt":
-                triplet.cnn = tuple.getFloatByField("cnn");
-                break;
-            case "lstm-bolt":
-                triplet.lstm = tuple.getFloatByField("lstm");
-                break;
-            case "gru-bolt":
-                triplet.gru = tuple.getFloatByField("gru");
-                break;
-        }
-
-        if (triplet.cnn == -1 || triplet.lstm == -1 || triplet.gru == -1)
-            return;
-
-        float[][] level0Result = new float[][]{{triplet.cnn, triplet.lstm, triplet.gru}};
-
-        Tensor x = Tensor.create(level0Result);
-        Tensor result = sess.runner()
-                .feed("final_input/concat:0", x)
-                .fetch("final_output/Sigmoid:0")
+        // CNN Model
+        Tensor x_1 = Tensor.create(input);
+        Tensor result_1 = sess.runner()
+                .feed("cnn_input:0", x_1)
+                .fetch("cnn_output/Sigmoid:0")
                 .run()
                 .get(0);
 
-        float[][] pred = (float[][]) result.copyTo(new float[1][1]);
+        float[][] cnn_pred = (float[][]) result_1.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, pred[0][0]));
+        Tensor x_2 = Tensor.create(input);
+        Tensor result_2 = sess.runner()
+                .feed("lstm_input:0", x_2)
+                .fetch("lstm_output/Sigmoid:0")
+                .run()
+                .get(0);
+
+        float[][] lstm_pred = (float[][]) result_2.copyTo(new float[1][1]);
+
+        Tensor x_3 = Tensor.create(input);
+        Tensor result_3 = sess.runner()
+                .feed("gru_input:0", x_3)
+                .fetch("gru_output/Sigmoid:0")
+                .run()
+                .get(0);
+
+        float[][] gru_pred = (float[][]) result_3.copyTo(new float[1][1]);
+
+        outputCollector.emit(new Values(url, cnn_pred[0][0], lstm_pred[0][0], gru_pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "pred"));
+        outputFieldsDeclarer.declare(new Fields("url", "cnn", "lstm", "gru"));
     }
 }

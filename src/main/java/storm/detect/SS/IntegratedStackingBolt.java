@@ -1,4 +1,4 @@
-package storm.detect.integrated;
+package storm.detect.SS;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;

@@ -8,10 +8,10 @@ import org.apache.storm.metric.HttpForwardingMetricsServer;
 import org.apache.storm.metric.LoggingMetricsConsumer;
 import org.apache.storm.metric.api.IMetricsConsumer.DataPoint;
 import org.apache.storm.metric.api.IMetricsConsumer.TaskInfo;
-import storm.topo.FirstTopo;
-import storm.topo.FourthTopo;
-import storm.topo.SecondTopo;
-import storm.topo.ThirdTopo;
+import storm.topo.ISTopo;
+import storm.topo.SISTopo;
+import storm.topo.SSTopo;
+import storm.topo.SSSTopo;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -195,10 +195,10 @@ public class PerfMain {
         StormTopology stormTopology = null;
 
         switch (topologyNum) {
-            case 1: stormTopology = new FirstTopo().topology(transmitTime); break;
-            case 2: stormTopology = new SecondTopo().topology(transmitTime); break;
-            case 3: stormTopology = new ThirdTopo().topology(transmitTime); break;
-            case 4: stormTopology = new FourthTopo().topology(transmitTime); break;
+            case 1: stormTopology = new ISTopo().topology(transmitTime); break;
+            case 2: stormTopology = new SSTopo().topology(transmitTime); break;
+            case 3: stormTopology = new SSSTopo().topology(transmitTime); break;
+            case 4: stormTopology = new SISTopo().topology(transmitTime); break;
         }
 
         try {

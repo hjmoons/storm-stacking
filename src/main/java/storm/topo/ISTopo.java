@@ -3,14 +3,14 @@ package storm.topo;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
-import storm.detect.independent.CNNBolt;
-import storm.detect.independent.GRUBolt;
-import storm.detect.independent.LSTMBolt;
-import storm.detect.independent.StackingBolt;
+import storm.detect.IS.CNNBolt;
+import storm.detect.IS.GRUBolt;
+import storm.detect.IS.LSTMBolt;
+import storm.detect.IS.StackingBolt;
 import storm.input.InputSpout;
 import storm.output.OutputBolt;
 
-public class FirstTopo {
+public class ISTopo {
     private final int NUM_SPOUT = 1;
     private final int NUM_CNNBOLT = 1;
     private final int NUM_LSTMBOLT = 2;

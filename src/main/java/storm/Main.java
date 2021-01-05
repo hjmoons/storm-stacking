@@ -3,10 +3,10 @@ package storm;
 import org.apache.storm.Config;
 import org.apache.storm.perf.utils.Helper;
 import org.apache.storm.utils.Utils;
-import storm.topo.FirstTopo;
-import storm.topo.FourthTopo;
-import storm.topo.SecondTopo;
-import storm.topo.ThirdTopo;
+import storm.topo.ISTopo;
+import storm.topo.SISTopo;
+import storm.topo.SSTopo;
+import storm.topo.SSSTopo;
 
 import java.util.Map;
 
@@ -24,16 +24,16 @@ public class Main {
 
         switch (Integer.parseInt(topologyNumber)) {
             case 1:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new FirstTopo().topology(transmitTime));
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new ISTopo().topology(transmitTime));
                 break;
             case 2:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SecondTopo().topology(transmitTime));
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SSTopo().topology(transmitTime));
                 break;
             case 3:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new ThirdTopo().topology(transmitTime));
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SSSTopo().topology(transmitTime));
                 break;
             case 4:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new FourthTopo().topology(transmitTime));
+                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SISTopo().topology(transmitTime));
                 break;
             default:
                 break;

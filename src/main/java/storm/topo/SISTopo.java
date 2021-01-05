@@ -2,14 +2,14 @@ package storm.topo;
 
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import storm.detect.semi_independent.CNNBolt;
-import storm.detect.semi_independent.StackingBolt;
-import storm.detect.semi_independent.GRUBolt;
-import storm.detect.semi_independent.LSTMBolt;
+import storm.detect.SIS.CNNBolt;
+import storm.detect.SIS.StackingBolt;
+import storm.detect.SIS.GRUBolt;
+import storm.detect.SIS.LSTMBolt;
 import storm.input.InputSpout;
 import storm.output.OutputBolt;
 
-public class FourthTopo {
+public class SISTopo {
     private final int NUM_SPOUT = 1;
     private final int NUM_CNNBOLT = 1;
     private final int NUM_LSTMBOLT = 2;

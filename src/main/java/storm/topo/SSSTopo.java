@@ -2,12 +2,12 @@ package storm.topo;
 
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
-import storm.detect.semi_integrated.StackingBolt;
-import storm.detect.semi_integrated.BaseModelBolt;
+import storm.detect.SSS.StackingBolt;
+import storm.detect.SSS.BaseModelBolt;
 import storm.input.InputSpout;
 import storm.output.OutputBolt;
 
-public class ThirdTopo {
+public class SSSTopo {
     private final int NUM_SPOUT = 1;
     private final int NUM_LEVEL0BOLT = 5;
     private final int NUM_FINALBOLT = 1;
