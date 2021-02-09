@@ -9,11 +9,9 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class InputSpout extends BaseRichSpout {
     private Log log = LogFactory.getLog(InputSpout.class);
@@ -33,6 +31,7 @@ public class InputSpout extends BaseRichSpout {
     };
     private int trans_time;
 
+    // inner class for latency estimation
     private class SentWithTime {
         public final long id;
         public final String url;
@@ -45,12 +44,14 @@ public class InputSpout extends BaseRichSpout {
         }
     }
 
+    // helper's instance
     HistogramMetric _histo;
+    long count = 0l;
+    long nextTime = 0l;
 
     public InputSpout(int trans_time) {
         this.trans_time = trans_time;
     }
-
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
@@ -61,8 +62,6 @@ public class InputSpout extends BaseRichSpout {
         topologyContext.registerMetric("comp-lat-histo", _histo, 10); //Update every 10 seconds, so we are not too far behind
     }
 
-    long count = 0l;
-    long nextTime = 0l;
     @Override
     public void nextTuple() {
         if (System.currentTimeMillis() >= nextTime) {

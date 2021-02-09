@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * 지연시간 비교 실험을 위한 토폴로지 실행 클래스
+ * */
 public class PerfMain {
     private static final Histogram _histo = new Histogram(3600000000000L, 3);
     private static final AtomicLong _systemCPU = new AtomicLong(0);

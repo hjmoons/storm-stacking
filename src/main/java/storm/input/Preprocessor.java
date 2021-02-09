@@ -1,5 +1,8 @@
 package storm.input;
 
+/**
+ * URL 데이터를 정수형태의 Vector로 변환하는 클래스
+ */
 public class Preprocessor {
 
     static String printable = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ";

@@ -1,5 +1,8 @@
 package storm.perf;
 
+/**
+ * 성능 측정 결과 저장 클래스
+ */
 public class MemMeasure {
     private long _mem = 0;
     private long _time = 0;
