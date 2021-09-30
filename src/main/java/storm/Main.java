@@ -1,7 +1,10 @@
 package storm;
 
 import org.apache.storm.Config;
-import org.apache.storm.perf.utils.Helper;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.*;
+import org.apache.storm.thrift.TException;
+import org.apache.storm.utils.NimbusClient;
 import org.apache.storm.utils.Utils;
 import storm.topo.ISTopo;
 import storm.topo.SISTopo;
@@ -11,32 +14,54 @@ import storm.topo.SSSTopo;
 import java.util.Map;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         String topologyName = args[0];
-        String configPath = args[1];
-        String topologyNumber = args[2];
-        int executionTime = Integer.parseInt(args[3]);
-        int transmitTime = Integer.parseInt(args[4]);
-
-        Map<String, Object> topoConf = Utils.findAndReadConfigFile(configPath);
-        topoConf.put(Config.TOPOLOGY_DISABLE_LOADAWARE_MESSAGING, true);
-        topoConf.put(Config.TOPOLOGY_NAME, topologyName);
+        String topologyNumber = args[1];
+        StormTopology stormTopology = null;
 
         switch (Integer.parseInt(topologyNumber)) {
             case 1:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new ISTopo().topology(transmitTime));
+                stormTopology = new ISTopo().topology();
                 break;
             case 2:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SSTopo().topology(transmitTime));
+                stormTopology = new SSTopo().topology();
                 break;
             case 3:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SSSTopo().topology(transmitTime));
+                stormTopology = new SSSTopo().topology();
                 break;
             case 4:
-                Helper.runOnClusterAndPrintMetrics(executionTime * 60, topologyName, topoConf, new SISTopo().topology(transmitTime));
+                stormTopology = new SISTopo().topology();
                 break;
             default:
                 break;
+        }
+
+        Config config = new Config();
+        config.setNumWorkers(3);
+
+        try {
+            StormSubmitter.submitTopology(topologyName, config, stormTopology);
+
+            Thread.sleep(60 * 60 * 1000);
+
+            Map<String, Object> conf = Utils.readStormConfig();
+            Nimbus.Client client = NimbusClient.getConfiguredClient(conf).getClient();
+            KillOptions killOpts = new KillOptions();
+            killOpts.set_wait_secs(0);
+            client.killTopologyWithOpts(topologyName, killOpts);
+
+        } catch (AlreadyAliveException e) {
+
+        } catch (InvalidTopologyException e) {
+
+        } catch (AuthorizationException e) {
+
+        } catch (NotAliveException e) {
+
+        } catch (TException e) {
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

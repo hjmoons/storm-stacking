@@ -3,6 +3,7 @@ package storm.topo;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
+
 import storm.detect.IS.CNNBolt;
 import storm.detect.IS.GRUBolt;
 import storm.detect.IS.LSTMBolt;
@@ -18,9 +19,9 @@ public class ISTopo {
     private final int NUM_FINALBOLT = 1;
     private final int NUM_OUTPUTBOLT = 1;
 
-    public StormTopology topology(int trans_time) {
+    public StormTopology topology() {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
-        topologyBuilder.setSpout("input-spout", new InputSpout(trans_time), NUM_SPOUT);
+        topologyBuilder.setSpout("input-spout", new InputSpout(), NUM_SPOUT);
         topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).shuffleGrouping("input-spout");
         topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).shuffleGrouping("input-spout");
