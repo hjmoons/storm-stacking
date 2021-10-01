@@ -23,6 +23,7 @@ public class StackingTopology {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
+            System.out.println("No arguments 'InputTopic', 'OutputTopic'.");
             System.exit(0);
         }
 
