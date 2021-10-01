@@ -20,8 +20,8 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StackingBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(StackingBolt.class);
+public class FianlBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(FianlBolt.class);
     private OutputCollector outputCollector;
     private SavedModelBundle savedModelBundle;
     private Session sess;
