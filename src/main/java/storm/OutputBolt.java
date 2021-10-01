@@ -1,4 +1,4 @@
-package storm.output;
+package storm;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -1,4 +1,4 @@
-package storm.detect.SIS;
+package storm;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -17,24 +17,19 @@ import org.tensorflow.Tensor;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.HashMap;
 import java.util.Map;
 
-public class StackingBolt extends BaseRichBolt {
-    private Log log = LogFactory.getLog(StackingBolt.class);
+public class LSTMBolt extends BaseRichBolt {
+    private Log log = LogFactory.getLog(LSTMBolt.class);
     private OutputCollector outputCollector;
+    private Preprocessor preprocessor;
     private SavedModelBundle savedModelBundle;
     private Session sess;
-
-    private float[][] level0Result = new float[1][3];
-
-    private Map<String, Float> cnnMap = new HashMap<>();
-    private Map<String, Float> lstmMap = new HashMap<>();
-    private Map<String, Float> gruMap = new HashMap<>();
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.outputCollector = outputCollector;
+        this.preprocessor = new Preprocessor();
 
         File directory = new File("variables");
         if (! directory.exists()){
@@ -63,26 +58,25 @@ public class StackingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String url = tuple.getStringByField("url");
+        float cnn = tuple.getFloatByField("cnn");
 
-        level0Result[0][0] = tuple.getFloatByField("cnn");
-        level0Result[0][1] = tuple.getFloatByField("lstm");
-        level0Result[0][2] = tuple.getFloatByField("gru");
+        int[][] input = preprocessor.convert(url);
 
-        Tensor x = Tensor.create(level0Result);
+        Tensor x = Tensor.create(input);
         Tensor result = sess.runner()
-                .feed("final_input/concat:0", x)
-                .fetch("final_output/Sigmoid:0")
+                .feed("lstm_input:0", x)
+                .fetch("lstm_output/Sigmoid:0")
                 .run()
                 .get(0);
 
         float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, pred[0][0]));
+        outputCollector.emit(new Values(url, cnn, pred[0][0]));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "pred"));
+        outputFieldsDeclarer.declare(new Fields("url", "cnn", "lstm"));
     }
 }

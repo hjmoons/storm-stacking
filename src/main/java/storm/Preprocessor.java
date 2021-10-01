@@ -1,4 +1,4 @@
-package storm.input;
+package storm;
 
 /**
  * URL 데이터를 정수형태의 Vector로 변환하는 클래스
