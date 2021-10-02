@@ -77,12 +77,14 @@ public class FianlBolt extends BaseRichBolt {
 
         float[][] pred = (float[][]) result.copyTo(new float[1][1]);
 
-        outputCollector.emit(new Values(url, pred[0][0]));
+        String output = url + "," + String.valueOf(pred[0][0]);
+
+        outputCollector.emit(new Values(output));
         outputCollector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("url", "pred"));
+        outputFieldsDeclarer.declare(new Fields("message"));
     }
 }

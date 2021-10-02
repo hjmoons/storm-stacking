@@ -16,14 +16,14 @@ public class StackingTopology {
 
     private final int NUM_KAFKASPOUT = 1;
     private final int NUM_CNNBOLT = 1;
-    private final int NUM_LSTMBOLT = 2;
-    private final int NUM_GRUBOLT = 2;
+    private final int NUM_LSTMBOLT = 1;
+    private final int NUM_GRUBOLT = 1;
     private final int NUM_FINALBOLT = 1;
     private final int NUM_KAFKABOLT = 1;
 
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.out.println("No arguments 'InputTopic', 'OutputTopic'.");
+            System.out.println("No arguments InputTopic, OutputTopic.");
             System.exit(0);
         }
 
@@ -67,7 +67,7 @@ public class StackingTopology {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 
         topologyBuilder.setSpout("kafka-spout", new KafkaSpout(kafkaSpoutConfig(zkhosts, inputTopic)), NUM_KAFKASPOUT);
-        topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("input-spout");
+        topologyBuilder.setBolt("cnn-bolt", new CNNBolt(), NUM_CNNBOLT).shuffleGrouping("kafka-spout");
         topologyBuilder.setBolt("lstm-bolt", new LSTMBolt(), NUM_LSTMBOLT).shuffleGrouping("cnn-bolt");
         topologyBuilder.setBolt("gru-bolt", new GRUBolt(), NUM_GRUBOLT).shuffleGrouping("lstm-bolt");
         topologyBuilder.setBolt("final-bolt", new FianlBolt(), NUM_FINALBOLT).shuffleGrouping("gru-bolt");
@@ -99,7 +99,7 @@ public class StackingTopology {
         kafkaBoltConfig.put("bootstrap.servers", bootstrap);
         kafkaBoltConfig.put("acks", "1");
         kafkaBoltConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        kafkaBoltConfig.put("value.serializer", "org.springframework.kafka.support.serializer.JsonSerializer");
+        kafkaBoltConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
         return kafkaBoltConfig;
     }

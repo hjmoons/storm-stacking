@@ -57,7 +57,8 @@ public class CNNBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String url = tuple.getStringByField("url");
+        //String url = tuple.getStringByField("url");
+        String url = tuple.getString(0);
 
         int[][] input = preprocessor.convert(url);
 
