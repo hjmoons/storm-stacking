@@ -9,7 +9,7 @@ import org.apache.storm.utils.Utils;
 import java.util.Map;
 
 /**
- * 성능 측정을 위한 토폴로지 클래스
+ * 등록된 토폴로지를 제어하기 위한 클래스
  */
 public class Cluster {
     LocalCluster _local = null;

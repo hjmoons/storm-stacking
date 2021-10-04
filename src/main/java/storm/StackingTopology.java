@@ -22,6 +22,7 @@ public class StackingTopology {
     private final int NUM_KAFKABOLT = 1;
 
     public static void main(String[] args) throws Exception {
+        // Kafka의 Input, Output 토픽 입력 확인
         if (args.length < 2) {
             System.out.println("No arguments InputTopic, OutputTopic.");
             System.exit(0);
@@ -30,26 +31,31 @@ public class StackingTopology {
         String inputTopic = args[0];
         String outputTopic = args[1];
 
+        // 실행시간
         int numSecs = 300;
         if (args != null && args.length > 2) {
             numSecs = Integer.valueOf(args[2]);
         }
 
+        // Zookeeper 서버 주소
         String zkHosts = "MN:2181,SN01:2181,SN02:2181,SN03:2181";
         if (args != null && args.length > 3) {
             zkHosts = args[3];
         }
 
+        // Kafka 서버 주소
         String bootstrap = "MN:9092,SN01:9092,SN02:9092,SN03:9092";
         if (args != null && args.length > 4) {
             bootstrap = args[4];
         }
 
+        // 토폴로지 이름
         String topologyName = "Storm-Stacking";
         if (args != null && args.length > 5) {
             topologyName = args[5];
         }
 
+        // 토폴로지 실행
         Config config = new Config();
         config.setNumWorkers(3);
         Cluster cluster = new Cluster(config);
@@ -63,6 +69,7 @@ public class StackingTopology {
         System.exit(0);
     }
 
+    /* 토폴로지 구성 함수 */
     public StormTopology topology(String zkhosts, String bootstrap, String inputTopic, String outputTopic) {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 

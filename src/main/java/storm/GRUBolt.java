@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Map;
 
+/**
+ * 악성 URL 탐지 모델에 사용된 GRU 모델을 실행하는 볼트 클래스
+ */
 public class GRUBolt extends BaseRichBolt {
     private Log log = LogFactory.getLog(GRUBolt.class);
     private OutputCollector outputCollector;
@@ -36,11 +39,13 @@ public class GRUBolt extends BaseRichBolt {
             directory.mkdir();
         }
 
+        // resource 폴더에 있는 모델 탐색
         ClassPathResource model = new ClassPathResource("saved_model.pb");
         ClassPathResource v1 = new ClassPathResource("variables/variables.data-00000-of-00001");
         ClassPathResource v2 = new ClassPathResource("variables/variables.index");
 
         try {
+            // resource 폴더에 있는 모델을 스톰이 실행되는 서버에 다운로드
             File modelFile = new File("./saved_model.pb");
             File v1File = new File("./variables/variables.data-00000-of-00001");
             File v2File = new File("./variables/variables.index");
@@ -48,6 +53,7 @@ public class GRUBolt extends BaseRichBolt {
             IOUtils.copy(v1.getInputStream(),new FileOutputStream(v1File));
             IOUtils.copy(v2.getInputStream(),new FileOutputStream(v2File));
 
+            // 저장된 모델 불러오기
             this.savedModelBundle = SavedModelBundle.load("./", "serve");
             this.sess = savedModelBundle.session();
         } catch (Exception e) {
@@ -57,12 +63,13 @@ public class GRUBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String url = tuple.getStringByField("url");
-        float cnn = tuple.getFloatByField("cnn");
-        float lstm = tuple.getFloatByField("lstm");
+        String url = tuple.getStringByField("url"); // 입력된 URL 데이터
+        float cnn = tuple.getFloatByField("cnn");   // CNN의 예측 결과 데이터
+        float lstm = tuple.getFloatByField("lstm"); // LSTM의 예측 결과 데이터
 
-        int[][] input = preprocessor.convert(url);
+        int[][] input = preprocessor.convert(url);  // URL 데이터 전처리
 
+        // 저장된 모델 실행
         Tensor x = Tensor.create(input);
         Tensor result = sess.runner()
                 .feed("gru_input:0", x)
@@ -70,7 +77,7 @@ public class GRUBolt extends BaseRichBolt {
                 .run()
                 .get(0);
 
-        float[][] pred = (float[][]) result.copyTo(new float[1][1]);
+        float[][] pred = (float[][]) result.copyTo(new float[1][1]);    // 결과 데이터
 
         outputCollector.emit(new Values(url, cnn, lstm, pred[0][0]));
         outputCollector.ack(tuple);

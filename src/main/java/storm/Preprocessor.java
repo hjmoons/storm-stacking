@@ -7,6 +7,7 @@ public class Preprocessor {
 
     static String printable = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ";
 
+    /* URL의 문자열 데이터를 80개의 정수로 변환 */
     public int[][] convert(String url) {
         int[][] result = new int[1][80];
 
