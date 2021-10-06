@@ -42,3 +42,10 @@ URL 데이터 + 데이터 분류 결과
 https://github.com/hjmoons/storm-inference,0.000878
 ```
 
+## 버젼
+
+```
+Apache Zookeeper 3.4.1
+Apache Storm 1.2.3
+Apache Kafka 0.11.0.1
+```
