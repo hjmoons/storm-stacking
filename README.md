@@ -42,7 +42,7 @@ URL 데이터 + 데이터 분류 결과
 https://github.com/hjmoons/storm-inference,0.000878
 ```
 
-## 버젼
+## Version
 
 ```
 Apache Zookeeper 3.4.1
